@@ -1,5 +1,10 @@
 #! /usr/bin/env python
 # coding=utf-8
+
+# supertools - super log tools
+# Q&A: github or mikolaj.kaluszynski@akond.com
+#
+
 from __future__ import print_function
 import re
 import sys

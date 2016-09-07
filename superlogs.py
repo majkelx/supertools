@@ -1,3 +1,7 @@
+# supertools - super log tools
+# Q&A: github or mikolaj.kaluszynski@akond.com
+#
+
 from __future__ import print_function
 import re
 from os.path import isfile
@@ -23,7 +27,7 @@ def records(stream):
     buf = u''
 
     for l in stream:
-        if not isinstance(l, str) or version_info < (3,0) :
+        if not isinstance(l, str) or version_info < (3,0):
             l = l.decode('utf-8', errors='replace')
         buf += l
         if stop.search(l):
