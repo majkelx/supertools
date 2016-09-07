@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+# coding=utf-8
+from __future__ import print_function
+from optparse import OptionParser
+import superlogs
+
+
+def count(stream):
+    i = 0
+    r = superlogs.records(stream)
+    for _ in r:
+        i += 1
+    return i
+
+parser = OptionParser(description='wc-like utility for emci superlogs: counts logrecords in files'
+                                  'provided as arguments or in stdin if no files provided',
+                      epilog=superlogs.version(),
+                      usage='usage: %prog [options] [file [file ...]]',
+                      version=superlogs.version())
+parser.add_option('-v', '--verbose', action='store_true',
+                  help='some informative output to stderr')
+(opt, files) = parser.parse_args()
+
+ret = 0
+for f in superlogs.streams(files):
+    n = count(f)
+    if opt.verbose:
+        superlogs.info('%8d in %s' % (n, f.name))
+    ret += n
+
+print (ret)
