@@ -1,0 +1,63 @@
+#! /usr/bin/env python
+# coding=utf-8
+
+# supertools - super log tools
+# Q&A: github or mikolaj.kaluszynski@akond.com
+#
+
+from __future__ import print_function
+import re
+import sys
+from optparse import OptionParser
+import superlogs
+
+parser = OptionParser(description='split-like utility for emci superlogs: split superlog(s) '
+                                  'on 10000 records files output-prefixNNNNN',
+                      epilog=superlogs.version(),
+                      usage='usage: %prog [options] output-prefix [file [file ...]]',
+                      version=superlogs.version())
+parser.add_option('-v', '--verbose', action='store_true',
+                  help='some informative output to stderr')
+parser.add_option('-n', default=10000, type='int',
+                  help='maximum number of logrecords (default: %default)')
+parser.add_option('-s', '--suffix', type='str', default='',
+                  help='output files suffix (default no suffix)')
+(opt, args) = parser.parse_args()
+if len(args) < 1:
+    parser.error("output-prefix not provided")
+
+def nextfile(n, prefix, suffix, oldfile):
+    if oldfile:
+        if opt.verbose:
+            superlogs.info('file %s created' % oldfile.name)
+        oldfile.close()
+    return open('%s%05d%s' % (prefix, n, suffix), 'w')
+
+files = args[1:]
+prefix = args[0]
+suffix = opt.suffix
+files_count = 0
+record_count = opt.n  # new file needed
+outf = None
+
+for f in superlogs.streams(files):
+    for r in superlogs.records(f):
+        if record_count >= opt.n:  # rotate output file
+            outf = nextfile(files_count, prefix, suffix, outf)
+            files_count += 1
+            record_count = 0
+        record_count += 1
+        if sys.version_info < (3,0):
+            r = r.encode('utf-8')
+        print (r, end='', file=outf)
+
+if outf:
+    if opt.verbose:
+        superlogs.info('file %s created' % outf.name)
+    outf.close()
+
+if opt.verbose:
+    superlogs.info('Input splited into %d files' % files_count)
+outf.close()
+
+
